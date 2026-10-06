@@ -2,3 +2,4 @@
 __pycache__/
 trip_planner.db
 .env
+tests/

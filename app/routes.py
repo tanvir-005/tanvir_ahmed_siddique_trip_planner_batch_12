@@ -22,7 +22,7 @@ def create_trip():
             "message": "Request body is required."
         }, 400
 
-    error = validate_trip_data(data)
+    error = validate_trip(data)
 
     if error:
         return error, 400
@@ -106,7 +106,7 @@ def update_trip(trip_id):
             "message": "Request body is required."
         }, 400
 
-    error = validate_trip_data(data)
+    error = validate_trip(data)
 
     if error:
         return error, 400
