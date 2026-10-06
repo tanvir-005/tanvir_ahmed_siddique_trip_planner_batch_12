@@ -1,12 +1,10 @@
-from app import create_app
+from app import create_app, get_adress_and_port
 
-# creating a flask app by calling the function from
+# creating a flask app by calling the function
 app = create_app()
-
-# /health route to get json and 200 status code
-@app.route("/health")
-def health():
-    return {"status": "ok"}, 200
+address_and_port = get_adress_and_port()
+address = address_and_port[0]
+port = address_and_port[1]
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host=address, port=port, debug=True)
