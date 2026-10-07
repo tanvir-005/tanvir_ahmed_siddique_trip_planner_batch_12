@@ -6,11 +6,15 @@ from .services import validate_trip
 # Blueprint initialization
 blueprint = Blueprint("main", __name__)
 
+
+# -------------- GET : /health
 # /health route to get json and 200 status code
 @blueprint.get("/health")
 def health():
     return {"status": "ok"}, 200
 
+
+# -------------- POST : /api/v1/trips
 # /api/v1/trips route (POST) to create a trip
 @blueprint.post("/api/v1/trips")
 def create_trip():
@@ -48,6 +52,8 @@ def create_trip():
         "status": trip.status
     }, 201
 
+
+# -------------- GET : /api/v1/trips/<int:trip_id>
 # /api/v1/trips route (GET) to show a trip
 @blueprint.get("/api/v1/trips/<int:trip_id>")
 def get_trip(trip_id):
@@ -69,6 +75,8 @@ def get_trip(trip_id):
         "status": trip.status
     }, 200
 
+
+# -------------- GET : /api/v1/trips
 # route (GET) to show all trips
 @blueprint.get("/api/v1/trips")
 def get_trips():
@@ -87,6 +95,8 @@ def get_trips():
         for trip in trips
     ], 200
 
+
+# -------------- PUT : /api/v1/trips/<int:trip_id>
 # route (PUT) to update a trip
 @blueprint.put("/api/v1/trips/<int:trip_id>")
 def update_trip(trip_id):
@@ -129,6 +139,8 @@ def update_trip(trip_id):
         "status": trip.status
     }, 200
 
+
+# -------------- DELETE : /api/v1/trips/<int:trip_id>
 # route (DELETE) to delete a trip
 @blueprint.delete("/api/v1/trips/<int:trip_id>")
 def delete_trip(trip_id):
