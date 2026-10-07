@@ -1,10 +1,18 @@
 from flask import Blueprint, request
 from datetime import date
 from .models import db, Trip
-from .services import validate_trip
+from .services import validate_trip, validate_change, trip_dictonarize
+
 
 # Blueprint initialization
 blueprint = Blueprint("main", __name__)
+
+
+# -------------- GET : /
+# / route to get a message that the project is running
+@blueprint.get("/")
+def home():
+    return {"success": "project is running"}, 200
 
 
 # -------------- GET : /health
@@ -42,15 +50,7 @@ def create_trip():
     db.session.add(trip)
     db.session.commit()
 
-    return {
-        "id": trip.id,
-        "destination": trip.destination,
-        "start_date": trip.start_date.isoformat(),
-        "end_date": trip.end_date.isoformat(),
-        "budget": trip.budget,
-        "max_travelers": trip.max_travelers,
-        "status": trip.status
-    }, 201
+    return trip_dictonarize(trip), 201
 
 
 # -------------- GET : /api/v1/trips/<int:trip_id>
@@ -65,15 +65,7 @@ def get_trip(trip_id):
             "message": "Trip not found."
         }, 404
 
-    return {
-        "id": trip.id,
-        "destination": trip.destination,
-        "start_date": trip.start_date.isoformat(),
-        "end_date": trip.end_date.isoformat(),
-        "budget": trip.budget,
-        "max_travelers": trip.max_travelers,
-        "status": trip.status
-    }, 200
+    return trip_dictonarize(trip), 200
 
 
 # -------------- GET : /api/v1/trips
@@ -83,15 +75,7 @@ def get_trips():
     trips = Trip.query.all()
 
     return [
-        {
-            "id": trip.id,
-            "destination": trip.destination,
-            "start_date": trip.start_date.isoformat(),
-            "end_date": trip.end_date.isoformat(),
-            "budget": trip.budget,
-            "max_travelers": trip.max_travelers,
-            "status": trip.status
-        }
+        trip_dictonarize(trip)
         for trip in trips
     ], 200
 
@@ -116,10 +100,10 @@ def update_trip(trip_id):
             "message": "Request body is required."
         }, 400
 
-    error = validate_trip(data)
+    error = validate_change(trip, data)
 
     if error:
-        return error, 400
+        return error, 409 if error["error"] == "TRIP_NOT_EDITABLE" else 400
 
     trip.destination = data["destination"]
     trip.start_date = date.fromisoformat(data["start_date"])
@@ -129,15 +113,7 @@ def update_trip(trip_id):
 
     db.session.commit()
 
-    return {
-        "id": trip.id,
-        "destination": trip.destination,
-        "start_date": trip.start_date.isoformat(),
-        "end_date": trip.end_date.isoformat(),
-        "budget": trip.budget,
-        "max_travelers": trip.max_travelers,
-        "status": trip.status
-    }, 200
+    return trip_dictonarize(trip), 200
 
 
 # -------------- DELETE : /api/v1/trips/<int:trip_id>

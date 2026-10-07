@@ -1,5 +1,6 @@
 from datetime import date
 
+
 def validate_trip(data):
     destination = data.get("destination")
     start_date = data.get("start_date")
@@ -16,7 +17,7 @@ def validate_trip(data):
     try:
         start_date = date.fromisoformat(start_date)
         end_date = date.fromisoformat(end_date)
-    except ValueError:
+    except (TypeError, ValueError):
         return {
             "error": "INVALID_DATE",
             "message": "Dates must use YYYY-MM-DD format."
@@ -28,13 +29,25 @@ def validate_trip(data):
             "message": "end_date must be later than start_date."
         }
 
-    if budget is None or budget <= 0:
+    if not isinstance(budget, (int, float)) or isinstance(budget, bool):
+        return {
+            "error": "INVALID_BUDGET",
+            "message": "budget must be a number."
+        }
+
+    if budget <= 0:
         return {
             "error": "INVALID_BUDGET",
             "message": "budget must be greater than zero."
         }
 
-    if max_travelers is None or max_travelers <= 0:
+    if not isinstance(max_travelers, int) or isinstance(max_travelers, bool):
+        return {
+            "error": "INVALID_CAPACITY",
+            "message": "max_travelers must be an integer."
+        }
+
+    if max_travelers <= 0:
         return {
             "error": "INVALID_CAPACITY",
             "message": "max_travelers must be greater than zero."
