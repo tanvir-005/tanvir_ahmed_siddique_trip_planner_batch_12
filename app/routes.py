@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from datetime import date
-from .models import db, Trip, Traveler
-from .services import validate_trip, validate_change, trip_dictonarize, validate_traveler, validate_trip_join
+from .models import db, Trip, Traveler, Expense
+from .services import validate_trip, validate_change, trip_dictonarize, validate_traveler, validate_trip_join, validate_expense
 
 
 # Blueprint initialization
@@ -184,4 +184,62 @@ def add_traveler(trip_id):
         "id": traveler.id,
         "name": traveler.name,
         "email": traveler.email
+    }, 201
+
+
+# -------------- POST : /api/v1/trips/<int:trip_id>/expenses
+# route to add an expense to a trip
+@blueprint.post("/api/v1/trips/<int:trip_id>/expenses")
+def add_expense(trip_id):
+    trip = Trip.query.get(trip_id)
+
+    if trip is None:
+        return {
+            "error": "TRIP_NOT_FOUND",
+            "message": "Trip not found."
+        }, 404
+
+    data = request.get_json()
+
+    if not data:
+        return {
+            "error": "INVALID_REQUEST",
+            "message": "Request body is required."
+        }, 400
+
+    error = validate_expense(data)
+
+    if error:
+        return error, 400
+
+    if trip.status in ["COMPLETED", "CANCELLED"]:
+        return {
+            "error": "TRIP_NOT_EDITABLE",
+            "message": "Completed or cancelled trips cannot have expenses."
+        }, 409
+
+    total_expenses = sum(
+        expense.amount
+        for expense in trip.expenses
+    )
+
+    if total_expenses + data["amount"] > trip.budget:
+        return {
+            "error": "BUDGET_EXCEEDED",
+            "message": "Total expenses cannot exceed the trip budget."
+        }, 409
+
+    expense = Expense(
+        title=data["title"],
+        amount=data["amount"],
+        trip=trip
+    )
+
+    db.session.add(expense)
+    db.session.commit()
+
+    return {
+        "id": expense.id,
+        "title": expense.title,
+        "amount": expense.amount
     }, 201

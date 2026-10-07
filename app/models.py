@@ -22,6 +22,12 @@ class Trip(db.Model):
         back_populates="trips"
     )
 
+    expenses = db.relationship(
+        "Expense",
+        backref="trip",
+        cascade="all, delete-orphan"
+    )
+
 class Traveler(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
@@ -31,4 +37,15 @@ class Traveler(db.Model):
         "Trip",
         secondary=trip_traveler,
         back_populates="travelers"
+    )
+
+class Expense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+
+    trip_id = db.Column(
+        db.Integer,
+        db.ForeignKey("trip.id"),
+        nullable=False
     )
