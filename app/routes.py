@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from datetime import date
 from .models import db, Trip, Traveler, Expense
-from .services import validate_trip, validate_change, trip_dictonarize, validate_traveler, validate_trip_join, validate_expense
+from .services import validate_trip, validate_change, trip_dictonarize, validate_traveler, validate_trip_join, validate_expense, validate_status_change, trip_summary
 
 
 # Blueprint initialization
@@ -243,3 +243,97 @@ def add_expense(trip_id):
         "title": expense.title,
         "amount": expense.amount
     }, 201
+
+
+# -------------- DELETE : /api/v1/trips/<int:trip_id>/travelers/<int:traveler_id>
+# route to remove a traveler from a trip
+@blueprint.delete("/api/v1/trips/<int:trip_id>/travelers/<int:traveler_id>")
+def remove_traveler(trip_id, traveler_id):
+    trip = Trip.query.get(trip_id)
+
+    if trip is None:
+        return {
+            "error": "TRIP_NOT_FOUND",
+            "message": "Trip not found."
+        }, 404
+
+    traveler = Traveler.query.get(traveler_id)
+
+    if traveler is None:
+        return {
+            "error": "TRAVELER_NOT_FOUND",
+            "message": "Traveler not found."
+        }, 404
+
+    if traveler not in trip.travelers:
+        return {
+            "error": "TRAVELER_NOT_IN_TRIP",
+            "message": "Traveler is not part of this trip."
+        }, 404
+
+    if trip.status in ["COMPLETED", "CANCELLED"]:
+        return {
+            "error": "TRIP_NOT_EDITABLE",
+            "message": "Completed or cancelled trips cannot be modified."
+        }, 409
+
+    trip.travelers.remove(traveler)
+    db.session.commit()
+
+    return {
+        "message": "Traveler removed successfully."
+    }, 200
+
+
+# -------------- PATCH : /api/v1/trips/<int:trip_id>/status
+# route to change the status of a trip
+@blueprint.patch("/api/v1/trips/<int:trip_id>/status")
+def change_status(trip_id):
+    trip = Trip.query.get(trip_id)
+
+    if trip is None:
+        return {
+            "error": "TRIP_NOT_FOUND",
+            "message": "Trip not found."
+        }, 404
+
+    data = request.get_json()
+
+    if not data or "status" not in data:
+        return {
+            "error": "INVALID_REQUEST",
+            "message": "status is required."
+        }, 400
+
+    new_status = data["status"]
+
+    if new_status not in ["PLANNED", "ONGOING", "COMPLETED", "CANCELLED"]:
+        return {
+            "error": "INVALID_STATUS",
+            "message": "Invalid trip status."
+        }, 400
+
+    error = validate_status_change(trip, new_status)
+
+    if error:
+        return error, 409
+
+    trip.status = new_status
+    db.session.commit()
+
+    return trip_dictonarize(trip), 200
+
+
+# -------------- GET : /api/v1/trips/<int:trip_id>/summary
+# route to show trip summary
+@blueprint.get("/api/v1/trips/<int:trip_id>/summary")
+def get_trip_summary(trip_id):
+    trip = Trip.query.get(trip_id)
+
+    if trip is None:
+        return {
+            "error": "TRIP_NOT_FOUND",
+            "message": "Trip not found."
+        }, 404
+
+    return trip_summary(trip), 200
