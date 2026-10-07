@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from datetime import date
-from .models import db, Trip
-from .services import validate_trip, validate_change, trip_dictonarize
+from .models import db, Trip, Traveler
+from .services import validate_trip, validate_change, trip_dictonarize, validate_traveler, validate_trip_join
 
 
 # Blueprint initialization
@@ -135,3 +135,53 @@ def delete_trip(trip_id):
         "message": "Trip deleted successfully."
     }, 200
 
+
+# -------------- POST : /api/v1/trips/<int:trip_id>/travelers
+# route to add a traveler to a trip
+@blueprint.post("/api/v1/trips/<int:trip_id>/travelers")
+def add_traveler(trip_id):
+    trip = Trip.query.get(trip_id)
+
+    if trip is None:
+        return {
+            "error": "TRIP_NOT_FOUND",
+            "message": "Trip not found."
+        }, 404
+
+    data = request.get_json()
+
+    if not data:
+        return {
+            "error": "INVALID_REQUEST",
+            "message": "Request body is required."
+        }, 400
+
+    error = validate_traveler(data)
+
+    if error:
+        return error, 400
+
+    traveler = Traveler.query.filter_by(
+        email=data["email"]
+    ).first()
+
+    if traveler is None:
+        traveler = Traveler(
+            name=data["name"],
+            email=data["email"]
+        )
+
+    error = validate_trip_join(trip, traveler)
+
+    if error:
+        return error, 409
+
+    db.session.add(traveler)
+    trip.travelers.append(traveler)
+    db.session.commit()
+
+    return {
+        "id": traveler.id,
+        "name": traveler.name,
+        "email": traveler.email
+    }, 201
