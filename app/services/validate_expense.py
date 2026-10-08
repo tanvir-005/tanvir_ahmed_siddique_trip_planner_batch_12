@@ -20,4 +20,5 @@ def validate_expense(data):
             "message": "amount must be greater than zero."
         }
 
+    # no error means all ok
     return None

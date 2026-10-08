@@ -1,4 +1,5 @@
 def trip_dictonarize(trip):
+    # return the trip in json format.
     return {
         "id": trip.id,
         "destination": trip.destination,
