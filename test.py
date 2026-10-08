@@ -201,5 +201,30 @@ class TestAll(unittest.TestCase):
         trip.status = "ONGOING"
         self.assertIsNotNone(validate_status_change(trip, "PLANNED"))
 
+    def test_trip_summary(self):
+        trip = Trip()
+        trip.id = 10
+        trip.destination = "Shitakunda, Chattogram"
+        trip.start_date = date(2026, 10, 10)
+        trip.end_date = date(2026, 10, 11)
+        trip.budget = 6000
+        trip.max_travelers = 2
+        trip.status = "PLANNED"
+        trip.travelers = []
+
+        expense1 = Expense()
+        expense1.id = 1
+        expense1.title = "Hotel"
+        expense1.amount = 3000
+
+        expense2 = Expense()
+        expense2.id = 2
+        expense2.title = "Food"
+        expense2.amount = 2000
+
+        trip.expenses = [expense1, expense2]
+
+        self.assertIsNotNone(trip_summary(trip))
+
 if __name__ == "__main__":
     unittest.main()
