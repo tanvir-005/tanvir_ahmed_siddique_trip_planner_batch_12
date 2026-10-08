@@ -103,7 +103,13 @@ def update_trip(trip_id):
     error = validate_change(trip, data)
 
     if error:
-        return error, 409 if error["error"] == "TRIP_NOT_EDITABLE" else 400
+        status_code = 409 if error["error"] in [
+            "TRIP_NOT_EDITABLE",
+            "MAX_TRAVELERS_TOO_LOW",
+            "BUDGET_EXCEEDED",
+            "TRIP_OVERLAP"
+        ] else 400
+        return error, status_code
 
     trip.destination = data["destination"]
     trip.start_date = date.fromisoformat(data["start_date"])
