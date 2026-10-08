@@ -4,4 +4,4 @@ trip_planner.db
 .env
 tests/
 test.sh
-test.py 
+.coverage
