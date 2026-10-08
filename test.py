@@ -35,6 +35,56 @@ class TestAll(unittest.TestCase):
         }
         self.assertIsNotNone(validate_trip(data))
 
+    def test_invalid_trip_budget(self):
+        data = {
+            "destination": "Kuakata",
+            "start_date": "2026-10-09",
+            "end_date": "2026-10-11",
+            "budget": -15000,
+            "max_travelers": 5,
+        }
+        self.assertIsNotNone(validate_trip(data))
+
+    def test_invalid_trip_capacity(self):
+        data = {
+            "destination": "Kuakata",
+            "start_date": "2026-10-09",
+            "end_date": "2026-10-11",
+            "budget": 15000,
+            "max_travelers": -5,
+        }
+        self.assertIsNotNone(validate_trip(data))
+
+    def test_invalid_trip_date(self):
+        data = {
+            "destination": "Kuakata",
+            "start_date": "invalid-date",
+            "end_date": "2026-10-11",
+            "budget": 15000,
+            "max_travelers": 5,
+        }
+        self.assertIsNotNone(validate_trip(data))
+
+    def test_invalid_trip_budget_nan(self):
+        data = {
+            "destination": "Kuakata",
+            "start_date": "2026-10-10",
+            "end_date": "2026-10-11",
+            "budget": "15000",
+            "max_travelers": 5,
+        }
+        self.assertIsNotNone(validate_trip(data))
+
+    def test_invalid_trip_capacity_nan(self):
+        data = {
+            "destination": "Kuakata",
+            "start_date": "2026-10-10",
+            "end_date": "2026-10-11",
+            "budget": 15000,
+            "max_travelers": "5",
+        }
+        self.assertIsNotNone(validate_trip(data))
+
     def test_valid_trip_status(self):
         data = {
             "destination": "Kuakata",
@@ -43,6 +93,17 @@ class TestAll(unittest.TestCase):
             "budget": 15000,
             "max_travelers": 5,
             "status": "PLANNED"
+        }
+        self.assertIsNone(validate_status_on_trip_creation(data["status"]))
+
+    def test_valid_trip_status_empty(self):
+        data = {
+            "destination": "Kuakata",
+            "start_date": "2026-10-09",
+            "end_date": "2026-10-11",
+            "budget": 15000,
+            "max_travelers": 5,
+            "status": None
         }
         self.assertIsNone(validate_status_on_trip_creation(data["status"]))
 
