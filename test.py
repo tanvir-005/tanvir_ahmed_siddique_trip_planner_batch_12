@@ -28,6 +28,13 @@ class TestAll(unittest.TestCase):
         }
         self.assertIsNotNone(validate_trip(data))
 
+    def test_incomplete_trip_data(self):
+        data = {
+            "budget": 15000,
+            "max_travelers": 5,
+        }
+        self.assertIsNotNone(validate_trip(data))
+
     def test_valid_trip_status(self):
         data = {
             "destination": "Kuakata",
