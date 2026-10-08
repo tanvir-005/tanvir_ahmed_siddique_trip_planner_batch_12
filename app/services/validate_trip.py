@@ -54,3 +54,17 @@ def validate_trip(data):
         }
 
     return None
+
+
+
+def validate_status_on_trip_creation(status):
+    if status is None:
+        return None
+
+    if status != "PLANNED":
+        return {
+            "error": "INVALID_STATUS",
+            "message": "A new trip must have PLANNED status."
+        }
+
+    return None

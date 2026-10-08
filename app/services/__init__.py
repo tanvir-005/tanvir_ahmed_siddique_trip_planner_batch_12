@@ -1,4 +1,4 @@
-from .validate_trip import validate_trip
+from .validate_trip import validate_trip, validate_status_on_trip_creation
 from .validate_change import validate_change
 from .trip_dictonarize import trip_dictonarize
 from .validate_traveler import validate_traveler

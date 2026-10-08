@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from datetime import date
 from .models import db, Trip, Traveler, Expense
-from .services import validate_trip, validate_change, trip_dictonarize, validate_traveler, validate_trip_join, validate_expense, validate_status_change, trip_summary
+from .services import validate_trip, validate_change, trip_dictonarize, validate_traveler, validate_trip_join, validate_expense, validate_status_change, trip_summary, validate_status_on_trip_creation
 
 
 # Blueprint initialization
@@ -35,6 +35,11 @@ def create_trip():
         }, 400
 
     error = validate_trip(data)
+
+    if error:
+        return error, 400
+
+    error = validate_status_on_trip_creation(data)
 
     if error:
         return error, 400
